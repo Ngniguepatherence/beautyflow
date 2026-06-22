@@ -1,73 +1,122 @@
-# Welcome to your Lovable project
+# BeautySpace / LeaderSalon - SaaS Frontend 🚀
 
-## Project info
+Bienvenue sur le dépôt front-end de la plateforme de gestion SaaS dédiée aux salons de beauté, coiffeurs et professionnels du bien-être. Cette application permet aux gérants de salons d'administrer leur activité de A à Z et offre aux clients une interface fluide pour la prise de rendez-vous en ligne.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 📋 Table des matières
 
-## How can I edit this code?
+- [Aperçu du Projet](#-aperçu-du-projet)
+- [Fonctionnalités Principales](#-fonctionnalités-principales)
+- [Stack Technique](#-stack-technique)
+- [Structure du Projet](#-structure-du-projet)
+- [Prérequis](#-prérequis)
+- [Installation et Démarrage](#-installation-et-démarrage)
+- [Scripts Disponibles](#-scripts-disponibles)
+- [Environnement](#-environnement)
 
-There are several ways of editing your application.
+## 🌟 Aperçu du Projet
 
-**Use Lovable**
+L'application se divise en 3 grands espaces :
+1. **Espace Professionnel (Salon)** : Gestion des rendez-vous, des clients (CRM), du stock, du programme de fidélité, des campagnes marketing et des finances.
+2. **Espace Client (Public)** : Annuaire des salons (Public Explorer), prise de rendez-vous en ligne (Booking Flow), gestion de compte client.
+3. **Espace Administrateur** : Super-administration de la plateforme SaaS, gestion des abonnements et suivi des métriques globales.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## ✨ Fonctionnalités Principales
 
-Changes made via Lovable will be committed automatically to this repo.
+### Pour les Gérants de Salon
+- **Tableau de Bord** : Vue d'ensemble des statistiques, revenus et prochains rendez-vous.
+- **Agenda & Rendez-vous** : Gestion du planning, rappels automatisés.
+- **Prestations & Catalogue** : Définition des services, durées et tarifs.
+- **CRM & Fidélité** : Fichiers clients, historique, points de fidélité.
+- **Finances & Facturation** : Suivi du chiffre d'affaires, paiements.
+- **Gestion de Stock** : Suivi des produits, alertes de rupture de stock.
+- **Marketing** : Création de campagnes SMS/Email, promotions.
 
-**Use your preferred IDE**
+### Pour les Clients
+- **Prise de Rendez-vous** : Tunnel de réservation intuitif et adaptatif.
+- **Compte Client** : Suivi de ses rendez-vous, annulations, historique.
+- **Explorateur** : Recherche de salons à proximité par catégories.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠 Stack Technique
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Ce projet utilise des technologies modernes pour garantir performance, maintenabilité et une excellente expérience utilisateur.
 
-Follow these steps:
+- **Framework** : [React 18](https://react.dev/)
+- **Build Tool** : [Vite](https://vitejs.dev/)
+- **Langage** : [TypeScript](https://www.typescriptlang.org/)
+- **Routing** : [React Router v6](https://reactrouter.com/)
+- **Styling** : [Tailwind CSS](https://tailwindcss.com/)
+- **Composants UI** : [shadcn/ui](https://ui.shadcn.com/) (basé sur Radix UI)
+- **Gestion des Requêtes/État** : [TanStack React Query](https://tanstack.com/query/latest)
+- **Formulaires & Validation** : [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Graphiques** : [Recharts](https://recharts.org/)
+- **PWA** : Support via `vite-plugin-pwa`
+- **Tests** : [Vitest](https://vitest.dev/) & React Testing Library
+- **Linting** : ESLint
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 📂 Structure du Projet
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```text
+src/
+├── assets/         # Images, icônes et autres assets statiques
+├── components/     # Composants React réutilisables (shadcn/ui, composants partagés)
+├── contexts/       # Contextes React (Auth, Theme, etc.)
+├── hooks/          # Custom hooks (logique métier, gestion d'état)
+├── lib/            # Utilitaires (formatteurs, configuration Axios, utils shadcn)
+├── pages/          # Vues de l'application (Dashboard, Login, Booking, etc.)
+├── test/           # Fichiers de tests unitaires et d'intégration
+├── types/          # Définitions de types TypeScript (interfaces, models)
+├── App.tsx         # Composant racine avec définition des routes
+├── main.tsx        # Point d'entrée de l'application
+└── index.css       # Styles globaux et variables CSS (Tailwind)
 ```
 
-**Edit a file directly in GitHub**
+## ⚙️ Prérequis
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Assurez-vous d'avoir installé les éléments suivants sur votre machine :
+- **Node.js** (version 18+ recommandée)
+- **npm**, **yarn** ou **pnpm** (le projet utilise npm par défaut)
 
-**Use GitHub Codespaces**
+## 🚀 Installation et Démarrage
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. **Cloner le dépôt :**
+   ```bash
+   git clone <URL_DU_DEPOT>
+   cd remix-of-remix-of-fid-le-beautyds
+   ```
 
-## What technologies are used for this project?
+2. **Installer les dépendances :**
+   ```bash
+   npm install
+   # ou yarn install / pnpm install
+   ```
 
-This project is built with:
+3. **Lancer le serveur de développement :**
+   ```bash
+   npm run dev
+   ```
+   L'application sera accessible par défaut sur [http://localhost:8080](http://localhost:8080) (ou le port défini par Vite).
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📜 Scripts Disponibles
 
-## How can I deploy this project?
+Dans le dossier du projet, vous pouvez exécuter les commandes suivantes :
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+- `npm run dev` : Lance l'application en mode développement avec Hot Module Replacement (HMR).
+- `npm run build` : Construit l'application pour la production dans le dossier `dist`.
+- `npm run preview` : Lance un serveur web local pour prévisualiser le build de production.
+- `npm run lint` : Analyse le code avec ESLint pour détecter les erreurs.
+- `npm run test` : Lance la suite de tests avec Vitest.
+- `npm run test:watch` : Lance les tests en mode interactif.
 
-## Can I connect a custom domain to my Lovable project?
+## 🌍 Environnement
 
-Yes, you can!
+Pour se connecter à l'API Backend, vous devez configurer vos variables d'environnement. Créez un fichier `.env.local` à la racine du projet en vous basant sur le fichier d'exemple (s'il existe).
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Exemple de `.env.local` :
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_PUBLIC_URL=http://localhost:8080
+# Autres clés tierces (ex: Google OAuth, Stripe, etc.)
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+*Conçu avec ❤️ pour simplifier le quotidien des professionnels de la beauté.*
