@@ -279,6 +279,105 @@ export const translations: Record<Language, Record<string, string>> = {
     'chart.noRdv': 'Aucun rendez-vous aujourd\'hui',
     'chart.noAlerts': 'Stock OK — aucune alerte',
     'chart.below': 'sous le seuil',
+
+    // Explorer
+    'explorer.hero.partners': ' salons partenaires',
+    'explorer.hero.bookingsToday': '1 245 réservations aujourd\'hui',
+    'explorer.hero.title1': 'Réservez des prestations de',
+    'explorer.hero.title2': 'beauté',
+    'explorer.hero.title3': 'et de',
+    'explorer.hero.title4': 'bien-être',
+    'explorer.hero.title5': 'près de chez vous',
+    'explorer.hero.welcome': 'Bienvenue  ✨ Découvrez les salons, barbiers, spas et experts beauté les mieux notés près de vous.',
+    'explorer.hero.description': 'Découvrez les salons, barbiers, spas médicaux, studios de bien-être et experts en beauté les mieux notés, approuvés par des milliers de personnes au Cameroun.',
+    'explorer.search.placeholder': 'Quel soin recherchez-vous ?',
+    'explorer.search.clear': 'Effacer',
+    'explorer.search.nearMe': 'Autour de moi',
+    'explorer.filters.title': 'Filtres',
+
+    // Filter
+    'explorer.filters.reset': 'Tout réinitialiser',
+    'explorer.filters.city': 'Ville',
+    'explorer.filters.allCities': 'Toutes les villes',
+    'explorer.filters.category': 'Type de soin',
+    'explorer.filters.openNow': 'Ouvert maintenant',
+    'explorer.filters.instantBooking': 'Confirmation instantanée',
+    'explorer.filters.useLocation':'Utiliser ma position',
+    'explorer.filters.open':'Ouvert',
+    'explorer.filters.instant': 'Instantané',
+
+    // Categories
+    'explorer.categories.all': 'Tout',
+    'explorer.categories.hair': 'Coiffure',
+    'explorer.categories.nails': 'Ongles',
+    'explorer.categories.spa': 'Spa & Bien-être',
+    'explorer.categories.makeup': 'Maquillage',
+
+    // Trending
+    'explorer.trending.1': '✨ Tendance : Balayage caramel',
+    'explorer.trending.2': '💅 Pose en gel express 30 min',
+    'explorer.trending.3': '💆 Spa visage hydratant',
+    'explorer.trending.4': '💇 Brushing brillance',
+    'explorer.trending.5': '💄 Maquillage soirée',
+    'explorer.trending.6': '🌸 Soin signature rose gold',
+    'explorer.trending.7': '⚡ Manucure semi-permanente',
+
+    // Salon grid sections
+    'explorer.empty.noResults': 'Aucun salon ne correspond à votre recherche.',
+    
+    // Recommended
+    'explorer.sections.recommended': 'Recommandé pour vous',
+
+    //New
+    'explorer.sections.new': 'Nouveau sur BeautyFlow',
+
+    // For Salons - BeautyFlow App Pitch
+    'explorer.business.badge': 'Vous êtes propriétaire de salon ?',
+    'explorer.business.title1': 'BeautyFlow',
+    'explorer.business.title2': ', l\'app qui transforme votre salon en',
+    'explorer.business.title3': 'machine à croissance',
+    'explorer.business.description': 'Plus de clientes, moins de no-shows, plus de revenus. La plateforme n°1 pensée pour les salons africains — compatible WhatsApp, en FCFA, sans compétence technique requise.',
+
+    // Stats
+    'explorer.stats.noShows': 'de no-shows',
+    'explorer.stats.retention': 'de rétention',
+    'explorer.stats.revenue': 'de revenus',
+    'explorer.stats.start': 'pour démarrer',
+
+    // Feature grid
+    'explorer.features.whatsapp.title':'WhatsApp automatique',
+    'explorer.features.whatsapp.desc': 'Rappels, confirmations et promotions envoyés directement sur le téléphone de vos clientes.',
+    'explorer.features.calendar.title': 'Agenda intelligent',
+    'explorer.features.calendar.desc': 'Calendrier interactif, zéro double réservation, vue jour/semaine/mois.',
+    'explorer.features.loyalty.title': 'Fidélité & parrainage',
+    'explorer.features.loyalty.desc': 'Points automatiques, programme de parrainage et historique client complet.',
+    'explorer.features.finance.title': 'Finances & stock',
+    'explorer.features.finance.desc': 'Tableau de bord revenus, alertes stock en temps réel, exports détaillés.',
+    'explorer.features.pwa.title': 'App installable (PWA)',
+    'explorer.features.pwa.desc': 'Fonctionne hors-ligne, sur mobile comme sur desktop — comme une vraie app.',
+    'explorer.features.security.title': 'Données sécurisées',
+    'explorer.features.security.desc': 'Vos données clientes restent privées, sauvegardées et protégées.',
+
+    // CTA
+    'explorer.cta.title':'Essayez BeautyFlow gratuitement pendant 14 jours',
+    'explorer.cta.description':'Aucune carte bancaire requise. Configuration assistée. Support en français. Voyez des résultats concrets dès le premier mois.',
+    'explorer.cta.listSalon':'Référencer mon salon',
+    'explorer.cta.pricing':'Voir les tarifs',
+    'explorer.cta.trial':'14 jours offerts',
+    'explorer.cta.commitment':'Sans engagement',
+    'explorer.cta.activation':'Activé en 24h',
+
+    // Footer
+    'explorer.footer.powered':'Propulsé par',
+
+    // ExploreHeader
+    'header.bookBeauty':'Réservez beauté & bien-être',
+    'header.listSalon':'Référencer mon salon',
+    'header.favorites':'Favoris',
+    'header.login':'Se connecter',
+
+    // BeautyFlow Title Element
+    'meta.title': 'BeautyFlow - Gestion Salon',
   },
 
   en: {
@@ -559,5 +658,104 @@ export const translations: Record<Language, Record<string, string>> = {
     'chart.noRdv': 'No appointments today',
     'chart.noAlerts': 'Stock OK — no alerts',
     'chart.below': 'below threshold',
+
+    // Explorer
+    'explorer.hero.partners': ' partner salons',
+    'explorer.hero.bookingsToday': '1,245 bookings today',
+    'explorer.hero.title1': 'Book',
+    'explorer.hero.title2': 'beauty',
+    'explorer.hero.title3': 'and',
+    'explorer.hero.title4': 'wellness',
+    'explorer.hero.title5': 'services near you',
+    'explorer.hero.welcome': 'Welcome {name} ✨ Discover the highest-rated salons, barbers, spas and beauty experts near you.',
+    'explorer.hero.description': 'Discover top-rated salons, barbers, medical spas, wellness studios and beauty experts trusted by thousands across Cameroon.',
+    'explorer.search.placeholder': 'What service are you looking for?',
+    'explorer.search.clear': 'Clear',
+    'explorer.search.nearMe': 'Near me',
+    'explorer.filters.title': 'Filters',
+
+    // Filter
+    'explorer.filters.reset': 'Reset all',
+    'explorer.filters.city': 'City',
+    'explorer.filters.allCities': 'All cities',
+    'explorer.filters.category': 'Service type',
+    'explorer.filters.openNow': 'Open now',
+    'explorer.filters.instantBooking': 'Instant confirmation',
+    'explorer.filters.useLocation': 'Use my location',
+    'explorer.filters.open': 'Open',
+    'explorer.filters.instant': 'Instant',
+
+    // Categories
+    'explorer.categories.all': 'All',
+    'explorer.categories.hair': 'Hair',
+    'explorer.categories.nails': 'Nails',
+    'explorer.categories.spa': 'Spa & Wellness',
+    'explorer.categories.makeup': 'Makeup',
+
+    // Trending
+    'explorer.trending.1': '✨ Trending: Caramel balayage',
+    'explorer.trending.2': '💅 Express gel nails in 30 min',
+    'explorer.trending.3': '💆 Hydrating facial spa',
+    'explorer.trending.4': '💇 Shine blowout',
+    'explorer.trending.5': '💄 Evening makeup',
+    'explorer.trending.6': '🌸 Rose gold signature treatment',
+    'explorer.trending.7': '⚡ Semi-permanent manicure',
+
+    // Salon grid section
+    'explorer.empty.noResults': 'No salons match your search.',
+
+    // Recommended
+    'explorer.sections.recommended': 'Recommended for you',
+
+    //New
+    'explorer.sections.new': 'New on BeautyFlow',
+
+    // For Salons - BeautyFlow App Pitch
+    'explorer.business.badge': 'Do you own a salon?',
+    'explorer.business.title1': 'BeautyFlow',
+    'explorer.business.title2': ', the app that turns your salon into a',
+    'explorer.business.title3': 'growth machine',
+    'explorer.business.description': 'More clients, fewer no-shows, more revenue. The #1 platform designed for African salons — WhatsApp compatible, FCFA-ready, and no technical skills required.',
+
+    // Stats
+    'explorer.stats.noShows': 'fewer no-shows',
+    'explorer.stats.retention': 'higher retention',
+    'explorer.stats.revenue': 'more revenue',
+    'explorer.stats.start': 'to get started',
+
+    // Feature grid
+    'explorer.features.whatsapp.title': 'Automated WhatsApp',
+    'explorer.features.whatsapp.desc': 'Reminders, confirmations and promotions sent directly to your clients.',
+    'explorer.features.calendar.title': 'Smart Calendar',
+    'explorer.features.calendar.desc': 'Interactive scheduling with no double-bookings and day/week/month views.',
+    'explorer.features.loyalty.title': 'Loyalty & Referrals',
+    'explorer.features.loyalty.desc': 'Automatic points, referral programs and complete client history.',
+    'explorer.features.finance.title': 'Finance & Inventory',
+    'explorer.features.finance.desc': 'Revenue dashboards, stock alerts and detailed exports.',
+    'explorer.features.pwa.title': 'Installable App (PWA)',
+    'explorer.features.pwa.desc': 'Works offline on mobile and desktop just like a native app.',
+    'explorer.features.security.title': 'Secure Data',
+    'explorer.features.security.desc': 'Your customer data remains private, backed up and protected.',
+
+    //CTA
+    'explorer.cta.title':'Try BeautyFlow free for 14 days',
+    'explorer.cta.description':'No credit card required. Assisted setup. French-speaking support. See measurable results from your first month.',
+    'explorer.cta.listSalon':'List my salon',
+    'explorer.cta.pricing':'View pricing',
+    'explorer.cta.trial':'14 days free',
+    'explorer.cta.commitment':'No commitment',
+    'explorer.cta.activation':'Activated within 24h',
+
+    // Footer
+    'explorer.footer.powered':'Powered by',
+
+    // ExploreHeader
+    'header.bookBeauty':'Book Beauty & Wellness',
+    'header.listSalon':'List My Salon',
+    'header.favorites':'Favorites',
+    'header.login':'Log In',
+
+    // BeautyFlow Title Element
+    'meta.title': 'BeautyFlow - Salon Management',
   },
 };
