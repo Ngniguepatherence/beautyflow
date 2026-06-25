@@ -84,6 +84,22 @@ export const salonsApi = {
   },
 };
 
+// ===== Payments API =====
+export const paymentsApi = {
+  subscribe: async (salonId: string, plan: string, token: string) => {
+    const res = await fetch(`${API_BASE_URL}/payments/subscribe/${salonId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ plan })
+    });
+    if (!res.ok) throw new Error('Failed to initiate payment');
+    return res.json();
+  }
+};
+
 // ===== Tenant Data API =====
 // Generic tenant data access — scoped per salon
 export function createTenantApi<T>(storageKey: string) {

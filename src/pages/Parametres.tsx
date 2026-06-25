@@ -21,8 +21,10 @@ import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/layout/LanguageToggle';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
-import { getPlanColor, formatPlanPrice } from '@/lib/plans';
+import { PLANS, PlanType, getPlanColor, formatPlanPrice } from '@/lib/plans';
 import { BookingSettingsCard } from '@/components/settings/BookingSettingsCard';
+import { paymentsApi } from '@/lib/api';
+import { useSearchParams } from 'react-router-dom';
 
 const salonSchema = z.object({
   nom: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -45,6 +47,34 @@ export default function Parametres() {
   const { salon, updateSalon, updateConfigFidelite } = useSalon();
   const { t, language } = useLanguage();
   const { plan, getCustomerLimit, getStaffLimit, getCampaignLimit } = useSubscriptionPlan();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
+
+  React.useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      toast({ title: 'Paiement réussi', description: 'Votre abonnement a été mis à jour avec succès.', variant: 'default' });
+      searchParams.delete('payment');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleSubscribe = async (planToSubscribe: string) => {
+    try {
+      setIsProcessingPayment(true);
+      const token = 'mock-token'; // get from auth context if available
+      const response = await paymentsApi.subscribe(salon.id, planToSubscribe, token);
+      if (response.success && response.data.paymentLink) {
+        window.location.href = response.data.paymentLink;
+      } else {
+        toast({ title: 'Erreur', description: 'Impossible de générer le lien de paiement.', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Erreur', description: 'Une erreur est survenue lors de l\'initiation du paiement.', variant: 'destructive' });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
 
   const salonForm = useForm({
     resolver: zodResolver(salonSchema),
@@ -137,9 +167,39 @@ export default function Parametres() {
               {plan.loyaltyRulesEnabled && <Badge variant="secondary" className="text-[10px]">⭐ Règles fidélité</Badge>}
               {plan.prioritySupport && <Badge variant="secondary" className="text-[10px]">🎯 Support prioritaire</Badge>}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {language === 'fr' ? 'Contactez LeaderBright pour changer de plan' : 'Contact LeaderBright to change your plan'}
-            </p>
+            <div className="pt-4 border-t">
+              <p className="text-sm font-semibold mb-3">
+                {language === 'fr' ? 'Changer de forfait ou renouveler :' : 'Change plan or renew:'}
+              </p>
+              <div className="space-y-3">
+                {(Object.keys(PLANS) as PlanType[]).map((planKey) => {
+                  const p = PLANS[planKey];
+                  const isCurrent = plan.name === planKey;
+                  return (
+                    <div key={planKey} className={`p-3 rounded-xl border flex flex-col gap-2 ${isCurrent ? 'bg-primary/5 border-primary' : 'bg-background'}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm">{p.label}</span>
+                        <span className="text-sm font-semibold">{formatPlanPrice(p.price)}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{language === 'fr' ? p.description : p.descriptionEn}</p>
+                      <Button 
+                        onClick={() => handleSubscribe(planKey)} 
+                        disabled={isProcessingPayment}
+                        variant={isCurrent ? 'default' : 'outline'}
+                        className={`w-full mt-1 text-xs h-8 ${isCurrent ? 'gradient-primary text-white border-0' : ''}`}
+                      >
+                        {isProcessingPayment 
+                          ? 'Chargement...' 
+                          : isCurrent 
+                            ? (language === 'fr' ? 'Renouveler mon plan actuel' : 'Renew current plan')
+                            : (language === 'fr' ? `Passer au plan ${p.label}` : `Upgrade to ${p.label}`)
+                        }
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
