@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Search, ArrowRight, Star, Calendar, Heart, Sparkles, Scissors, Hand, Flower2, Brush, SlidersHorizontal, Navigation, Clock, Zap, X, Loader2, Store, MessageCircle, TrendingUp, Bell, BarChart3, Shield, CheckCircle2, Smartphone, Users } from 'lucide-react';
 import { Share2 } from 'lucide-react';
@@ -17,9 +17,14 @@ import { getBookingPublicUrl } from '@/lib/booking';
 import { getCategoryImage } from '@/lib/category-images';
 import { toast } from '@/hooks/use-toast';
 import { getSalonAccounts } from '@/lib/auth';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageToggle } from '@/components/layout/LanguageToggle';
 
+const CATEGORIES = [
+  { id: 'all', label: 'Tout', icon: Sparkles },
+  { id: 'Coiffure', label: 'Coiffure', icon: Scissors },
+  { id: 'Onglerie', label: 'Ongles', icon: Hand },
+  { id: 'Spa', label: 'Spa & Bien-être', icon: Flower2 },
+  { id: 'Maquillage', label: 'Maquillage', icon: Brush },
+];
 
 function extractCity(loc?: string): string | null {
   if (!loc) return null;
@@ -43,27 +48,12 @@ function isSalonOpenNow(s: ReturnType<typeof getSalonAccounts>[number]): boolean
 export default function PublicExplorer() {
   const navigate = useNavigate();
   const { client, isFavorite, toggleFavorite } = useClientAuth();
-  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [cityFilter, setCityFilter] = useState<string>('all');
   const [openNow, setOpenNow] = useState(false);
   const [instantOnly, setInstantOnly] = useState(false);
   const [locating, setLocating] = useState(false);
-
-  const CATEGORIES = [
-  { id: 'all', label: t('explorer.categories.all'), icon: Sparkles },
-  { id: 'Coiffure', label: t('explorer.categories.hair'), icon: Scissors },
-  { id: 'Onglerie', label: t('explorer.categories.nails'), icon: Hand },
-  { id: 'Spa', label: t('explorer.categories.spa'), icon: Flower2 },
-  { id: 'Maquillage', label: t('explorer.categories.makeup'), icon: Brush },
-];
-
-// Translation of Title element
-useEffect(() => {
-  document.title = t('meta.title')
-}, [t])
-
 
   const [salons, setSalons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,10 +162,8 @@ useEffect(() => {
   };
 
   return (
-    
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
       <ExplorerHeader />
-
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -192,22 +180,22 @@ useEffect(() => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-5 animate-fade-in">
             <Badge variant="secondary" className="border border-primary/20 bg-card/70 backdrop-blur px-3 py-1.5 shadow-sm">
               <Sparkles className="h-3 w-3 mr-1 text-primary" />
-              {salons.length} {t('explorer.hero.partners')}
+              {salons.length} salons partenaires
             </Badge>
             <Badge variant="default" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 backdrop-blur px-3 py-1.5 shadow-sm font-semibold">
               <Calendar className="h-3 w-3 mr-1" />
-              {t('explorer.hero.bookingsToday')}
+              1 245 réservations aujourd'hui
             </Badge>
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] animate-fade-in max-w-4xl mx-auto">
-            {t('explorer.hero.title1')}{' '}
-            <span className="text-aurora">{t('explorer.hero.title2')}</span> {t('explorer.hero.title3')}{' '}
-            <span className="italic font-serif">{t('explorer.hero.title4')}</span> {t('explorer.hero.title5')}
+            Réservez des prestations de{' '}
+            <span className="text-aurora">beauté</span> et de{' '}
+            <span className="italic font-serif">bien-être</span> près de chez vous
           </h1>
           <p className="mt-5 text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: '0.1s' }}>
             {client
               ? `Bienvenue ${client.nom.split(' ')[0]} ✨ Découvrez les salons, barbiers, spas et experts beauté les mieux notés près de vous.`
-              : `${t('explorer.hero.description')}`}
+              : 'Découvrez les salons, barbiers, spas médicaux, studios de bien-être et experts en beauté les mieux notés, approuvés par des milliers de personnes au Cameroun.'}
           </p>
 
           {/* Smart search bar */}
@@ -215,7 +203,7 @@ useEffect(() => {
             <div className="flex items-center gap-2 bg-card/95 backdrop-blur-xl rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-border/40 p-2 pl-6 focus-within:ring-2 focus-within:ring-primary/30 focus-within:shadow-[0_8px_30px_rgb(var(--primary),0.15)] transition-all">
               <Search className="h-5 w-5 text-muted-foreground shrink-0" />
               <Input
-                placeholder= {`${t('explorer.search.placeholder')}`}
+                placeholder="Quel soin recherchez-vous ?"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="border-0 shadow-none bg-transparent h-12 px-2 text-base md:text-lg focus-visible:ring-0 placeholder:text-muted-foreground/60"
@@ -224,7 +212,7 @@ useEffect(() => {
                 <button
                   type="button"
                   onClick={() => setQuery('')}
-                  aria-label={`${t('explorer.search.clear')}`}
+                  aria-label="Effacer"
                   className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground transition-colors"
                 >
                   <X className="h-4 w-4" />
@@ -239,13 +227,13 @@ useEffect(() => {
                 className="rounded-full h-12 px-4 gap-2 text-sm font-medium hidden sm:inline-flex hover:bg-primary/10 hover:text-primary transition-colors"
               >
                 {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
-                {t('explorer.search.nearMe')}
+                Autour de moi
               </Button>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button type="button" size="sm" className="rounded-full h-12 gap-2 px-6 gradient-primary shadow-lg glow-primary text-white font-bold text-base hover:scale-105 transition-transform">
                     <SlidersHorizontal className="h-4 w-4" />
-                    <span className="hidden sm:inline">{t('explorer.filters.title')}</span>
+                    <span className="hidden sm:inline">Filtres</span>
                     {activeFiltersCount > 0 && (
                       <span className="ml-0.5 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-background text-primary text-[10px] font-bold">
                         {activeFiltersCount}
@@ -255,24 +243,24 @@ useEffect(() => {
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-80 p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm">{t('explorer.filters.title')}</h3>
+                    <h3 className="font-semibold text-sm">Filtres</h3>
                     {activeFiltersCount > 0 && (
                       <button onClick={resetFilters} className="text-xs text-primary hover:underline">
-                        {t('explorer.filters.reset')}
+                        Tout réinitialiser
                       </button>
                     )}
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-xs font-medium flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" /> {t('explorer.filters.city')}
+                      <MapPin className="h-3.5 w-3.5" /> Ville
                     </Label>
                     <Select value={cityFilter} onValueChange={setCityFilter}>
                       <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder={t('explorer.filters.allCities')} />
+                        <SelectValue placeholder="Toutes les villes" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover z-50">
-                        <SelectItem value="all">{t('explorer.filters.allCities')}</SelectItem>
+                        <SelectItem value="all">Toutes les villes</SelectItem>
                         {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -280,7 +268,7 @@ useEffect(() => {
 
                   <div className="space-y-2">
                     <Label className="text-xs font-medium flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5" /> {t('explorer.filters.category')}
+                      <Sparkles className="h-3.5 w-3.5" /> Type de soin
                     </Label>
                     <Select value={category} onValueChange={setCategory}>
                       <SelectTrigger className="h-9 text-sm">
@@ -296,14 +284,14 @@ useEffect(() => {
                     <div className="flex items-center justify-between">
                       <Label htmlFor="f-open" className="text-sm flex items-center gap-2 cursor-pointer">
                         <Clock className="h-4 w-4 text-primary" />
-                        {t('explorer.filters.openNow')}
+                        Ouvert maintenant
                       </Label>
                       <Switch id="f-open" checked={openNow} onCheckedChange={setOpenNow} />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="f-instant" className="text-sm flex items-center gap-2 cursor-pointer">
                         <Zap className="h-4 w-4 text-accent" />
-                        {t('explorer.filters.instantBooking')}
+                        Confirmation instantanée
                       </Label>
                       <Switch id="f-instant" checked={instantOnly} onCheckedChange={setInstantOnly} />
                     </div>
@@ -318,7 +306,7 @@ useEffect(() => {
                     className="w-full gap-2 sm:hidden"
                   >
                     {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
-                    {t('explorer.filters.useLocation')}
+                    Utiliser ma position
                   </Button>
                 </PopoverContent>
               </Popover>
@@ -345,7 +333,7 @@ useEffect(() => {
                 )}
                 {openNow && (
                   <Badge variant="secondary" className="gap-1 pl-2 pr-1 h-7">
-                    <Clock className="h-3 w-3" /> {t('explorer.filters.open')}
+                    <Clock className="h-3 w-3" /> Ouvert
                     <button onClick={() => setOpenNow(false)} className="ml-0.5 rounded-full hover:bg-background/50 p-0.5">
                       <X className="h-3 w-3" />
                     </button>
@@ -353,7 +341,7 @@ useEffect(() => {
                 )}
                 {instantOnly && (
                   <Badge variant="secondary" className="gap-1 pl-2 pr-1 h-7">
-                    <Zap className="h-3 w-3" /> {t('explorer.filters.instant')}
+                    <Zap className="h-3 w-3" /> Instantané
                     <button onClick={() => setInstantOnly(false)} className="ml-0.5 rounded-full hover:bg-background/50 p-0.5">
                       <X className="h-3 w-3" />
                     </button>
@@ -393,13 +381,13 @@ useEffect(() => {
           <div className="relative flex overflow-hidden mask-fade">
             <div className="flex gap-2 animate-marquee whitespace-nowrap pr-2">
               {[...Array(2)].flatMap((_, k) => [
-                t('explorer.trending.1'),
-                t('explorer.trending.2'),
-                t('explorer.trending.3'),
-                t('explorer.trending.4'),
-                t('explorer.trending.5'),
-                t('explorer.trending.6'),
-                t('explorer.trending.7'),
+                '✨ Tendance : Balayage caramel',
+                '💅 Pose en gel express 30 min',
+                '💆 Spa visage hydratant',
+                '💇 Brushing brillance',
+                '💄 Maquillage soirée',
+                '🌸 Soin signature rose gold',
+                '⚡ Manucure semi-permanente',
               ].map((t, i) => (
                 <span key={`${k}-${i}`} className="inline-flex items-center text-xs font-medium text-muted-foreground bg-card/70 border border-border/60 backdrop-blur rounded-full px-3 py-1.5 mx-1">
                   {t}
@@ -415,7 +403,7 @@ useEffect(() => {
         {filtered.length === 0 ? (
           <Card className="p-10 text-center text-muted-foreground animate-fade-in">
             <Search className="h-10 w-10 mx-auto mb-2 opacity-40" />
-            {t('explorer.empty.noResults')}
+            Aucun salon ne correspond à votre recherche.
           </Card>
         ) : (
           <div className="space-y-12">
@@ -424,7 +412,7 @@ useEffect(() => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
                   <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
-                  {t('explorer.sections.recommended')}
+                  Recommandé pour vous
                 </h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -440,7 +428,7 @@ useEffect(() => {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    {t('explorer.sections.new')}
+                    Nouveau sur BeautyFlow
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -464,23 +452,25 @@ useEffect(() => {
         <div className="max-w-6xl mx-auto px-4 py-16 sm:py-24">
           <div className="text-center max-w-3xl mx-auto">
             <span className="inline-flex items-center gap-2 px-3 h-7 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-5 animate-fade-in">
-              <Store className="h-3.5 w-3.5" /> {t('explorer.business.badge')}
+              <Store className="h-3.5 w-3.5" /> Vous êtes propriétaire de salon ?
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
-              <span className="text-aurora">{t('explorer.business.title1')}</span>{t('explorer.business.title2')} <span className="italic font-serif">{t('explorer.business.title3')}</span>
+              <span className="text-aurora">BeautyFlow</span>, l'app qui transforme votre salon en{' '}
+              <span className="italic font-serif">machine à croissance</span>
             </h2>
             <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed">
-              {t('explorer.business.description')}
+              Plus de clientes, moins de no-shows, plus de revenus. La plateforme n°1 pensée pour les salons africains —
+              compatible WhatsApp, en FCFA, sans compétence technique requise.
             </p>
           </div>
 
           {/* Stats */}
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
             {[
-              { v: '-70%', l: t('explorer.stats.noShows'), icon: Bell },
-              { v: '+45%', l: t('explorer.stats.retention'), icon: Heart },
-              { v: '+30%', l: t('explorer.stats.revenue'), icon: TrendingUp },
-              { v: '5 min', l: t('explorer.stats.start'), icon: Zap },
+              { v: '-70%', l: 'de no-shows', icon: Bell },
+              { v: '+45%', l: 'de rétention', icon: Heart },
+              { v: '+30%', l: 'de revenus', icon: TrendingUp },
+              { v: '5 min', l: 'pour démarrer', icon: Zap },
             ].map(({ v, l, icon: Icon }) => (
               <div key={l} className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur p-5 text-center hover:border-primary/40 hover:-translate-y-1 transition-all">
                 <Icon className="h-5 w-5 mx-auto text-primary mb-2" />
@@ -493,12 +483,12 @@ useEffect(() => {
           {/* Features grid */}
           <div className="mt-14 grid md:grid-cols-3 gap-4">
             {[
-              { icon: MessageCircle, title: t('explorer.features.whatsapp.title'), desc: t('explorer.features.whatsapp.desc') },
-              { icon: Calendar, title: t('explorer.features.calendar.title'), desc: t('explorer.features.calendar.desc') },
-              { icon: Users, title: t('explorer.features.loyalty.title'), desc: t('explorer.features.loyalty.desc') },
-              { icon: BarChart3, title: t('explorer.features.finance.title'), desc: t('explorer.features.finance.desc') },
-              { icon: Smartphone, title: t('explorer.features.pwa.title'), desc: t('explorer.features.pwa.desc') },
-              { icon: Shield, title: t('explorer.features.security.title'), desc: t('explorer.features.security.desc') },
+              { icon: MessageCircle, title: 'WhatsApp automatique', desc: 'Rappels, confirmations et promotions envoyés directement sur le téléphone de vos clientes.' },
+              { icon: Calendar, title: 'Agenda intelligent', desc: 'Calendrier interactif, zéro double réservation, vue jour/semaine/mois.' },
+              { icon: Users, title: 'Fidélité & parrainage', desc: 'Points automatiques, programme de parrainage et historique client complet.' },
+              { icon: BarChart3, title: 'Finances & stock', desc: 'Tableau de bord revenus, alertes stock en temps réel, exports détaillés.' },
+              { icon: Smartphone, title: 'App installable (PWA)', desc: 'Fonctionne hors-ligne, sur mobile comme sur desktop — comme une vraie app.' },
+              { icon: Shield, title: 'Données sécurisées', desc: 'Vos données clientes restent privées, sauvegardées et protégées.' },
             ].map((f, i) => {
               const Icon = f.icon;
               return (
@@ -525,10 +515,11 @@ useEffect(() => {
             <div className="relative text-primary-foreground">
               <Sparkles className="h-8 w-8 mx-auto mb-3" />
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight max-w-2xl mx-auto">
-                {t('explorer.cta.title')}
+                Essayez BeautyFlow gratuitement pendant 14 jours
               </h3>
               <p className="mt-3 text-primary-foreground/90 max-w-xl mx-auto text-sm sm:text-base">
-                {t('explorer.cta.description')}
+                Aucune carte bancaire requise. Configuration assistée. Support en français.
+                Voyez des résultats concrets dès le premier mois.
               </p>
               <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button
@@ -537,20 +528,20 @@ useEffect(() => {
                   className="h-12 px-7 rounded-full bg-white text-primary hover:bg-white/90 font-semibold shadow-lg press"
                 >
                   <Store className="h-4 w-4 mr-1.5" />
-                  {t('explorer.cta.listSalon')}
+                  Référencer mon salon
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
                 <button
                   onClick={() => navigate('/pro#pricing')}
                   className="h-12 px-6 rounded-full border-2 border-white/40 text-primary-foreground hover:bg-white/10 font-semibold text-sm transition-all press"
                 >
-                  {t('explorer.cta.pricing')}
+                  Voir les tarifs
                 </button>
               </div>
               <div className="mt-6 flex items-center justify-center gap-5 text-xs text-primary-foreground/80 flex-wrap">
-                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> {t('explorer.cta.trial')}</span>
-                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> {t('explorer.cta.commitment')}</span>
-                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> {t('explorer.cta.activation')}</span>
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> 14 jours offerts</span>
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Sans engagement</span>
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Activé en 24h</span>
               </div>
             </div>
           </div>
@@ -560,7 +551,7 @@ useEffect(() => {
       <footer className="border-t py-8 text-center text-xs text-muted-foreground">
         <div className="flex items-center justify-center gap-1.5">
           <Sparkles className="h-3 w-3 text-primary" />
-          {t('explorer.footer.powered')} <span className="font-bold text-gradient">BeautyFlow</span>
+          Propulsé par <span className="font-bold text-gradient">BeautyFlow</span>
         </div>
       </footer>
     </div>
