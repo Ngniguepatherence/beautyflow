@@ -10,7 +10,9 @@ import { SalonAccount } from '@/types/auth';
 import { toast } from '@/hooks/use-toast';
 import { StatCard } from '@/components/dashboard/StatCard';
 import CreateSalonDialog from '@/components/admin/CreateSalonDialog';
+import { paymentsApi } from '@/lib/api';
 import SalonCard from '@/components/admin/SalonCard';
+import { useSearchParams } from 'react-router-dom';
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('fr-CM', { style: 'decimal', minimumFractionDigits: 0 }).format(amount) + ' FCFA';
@@ -19,15 +21,43 @@ function formatCurrency(amount: number): string {
 export default function AdminDashboard() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [salons, setSalons] = useState<SalonAccount[]>(getSalonAccounts);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  React.useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      toast({ title: 'Paiement réussi', description: 'L\'abonnement du salon a été mis à jour avec succès.', variant: 'default' });
+      searchParams.delete('payment');
+      setSearchParams(searchParams);
+      refresh();
+    }
+  }, [searchParams, setSearchParams]);
 
   const refresh = () => setSalons(getSalonAccounts());
 
-  const handleRenew = (id: string) => {
-    renewSalonSubscription(id);
-    toast({ title: 'Abonnement renouvelé pour 30 jours' });
-    refresh();
+  const handleRenew = async (id: string) => {
+    try {
+      setIsProcessing(true);
+      // In a real app we'd get the token from auth context, here we mock it or pass user token if available
+      const token = 'mock-token-from-auth-context';
+      const response = await paymentsApi.subscribe(id, 'pro', token);
+
+      if (response.success && response.data.paymentLink) {
+        window.location.href = response.data.paymentLink;
+      } else {
+        toast({ title: 'Erreur', description: 'Impossible de générer le lien de paiement.', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Erreur', description: 'Une erreur est survenue lors de l\'initiation du paiement.', variant: 'destructive' });
+      // Fallback local renewal for demo if backend is not running
+      renewSalonSubscription(id);
+      refresh();
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleToggle = (id: string, active: boolean) => {

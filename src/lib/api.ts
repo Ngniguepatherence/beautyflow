@@ -40,6 +40,36 @@ export const authApi = {
     return verifySalonLocal(email, password);
   },
 
+  googleLogin: (): void => {
+    const redirectUrl = encodeURIComponent(window.location.origin + '/pro/onboarding');
+    window.location.href = `${API_BASE_URL}/auth/google?redirect=${redirectUrl}`;
+  },
+
+  googleLoginWithToken: async (token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/auth/google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || 'Authentication Google échouée');
+    }
+    return res.json();
+  },
+
+  getMe: async (token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to fetch profile');
+    return res.json();
+  },
+
   getSession: (): AuthSession | null => {
     // TODO: Replace with token-based session from backend
     return getSessionLocal();
@@ -82,6 +112,86 @@ export const salonsApi = {
     // TODO: Replace with GET /api/salons/:id/subscription
     return checkSubscription(salon);
   },
+
+  onboard: async (form: any, token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/salons/onboard`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(form)
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || 'Erreur lors de la création du salon');
+    }
+    return res.json();
+  },
+
+  update: async (salonId: string, form: any, token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/salons/${salonId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(form)
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || 'Erreur lors de la mise à jour du salon');
+    }
+    return res.json();
+  },
+
+  link: async (identifier: string, token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/salons/link`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ identifier })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || 'Erreur lors de la liaison du salon');
+    }
+    return res.json();
+  },
+
+  addStaff: async (salonId: string, staff: any, token: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/salons/${salonId}/staff`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(staff)
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || 'Erreur lors de l’ajout du collaborateur');
+    }
+    return res.json();
+  },
+};
+
+// ===== Payments API =====
+export const paymentsApi = {
+  subscribe: async (salonId: string, plan: string, token: string) => {
+    const res = await fetch(`${API_BASE_URL}/payments/subscribe/${salonId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ plan })
+    });
+    if (!res.ok) throw new Error('Failed to initiate payment');
+    return res.json();
+  }
 };
 
 // ===== Tenant Data API =====
@@ -144,6 +254,11 @@ export const marketplaceApi = {
     });
     return res.json();
   },
+  getSalonAppointments: async (slug: string, date: string) => {
+    const res = await fetch(`${API_BASE_URL}/marketplace/salons/${slug}/appointments?date=${date}`);
+    if (!res.ok) throw new Error('Failed to fetch salon appointments');
+    return res.json();
+  },
   createBooking: async (token: string, data: any) => {
     const res = await fetch(`${API_BASE_URL}/marketplace/bookings`, {
       method: 'POST',
@@ -154,5 +269,31 @@ export const marketplaceApi = {
       body: JSON.stringify(data),
     });
     return res.json();
+  },
+  updateProfile: async (token: string, data: any) => {
+    const res = await fetch(`${API_BASE_URL}/marketplace/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  toggleFavorite: async (token: string, salonId: string) => {
+    const res = await fetch(`${API_BASE_URL}/marketplace/auth/favorites/toggle`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ salonId }),
+    });
+    return res.json();
+  },
+  googleLogin: (redirectUrlPath: string = '/explorer/login'): void => {
+    const redirectUrl = encodeURIComponent(window.location.origin + redirectUrlPath);
+    window.location.href = `${API_BASE_URL}/marketplace/auth/google?redirect=${redirectUrl}`;
   }
 };

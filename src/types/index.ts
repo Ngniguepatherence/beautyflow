@@ -61,6 +61,7 @@ export interface Depense {
 }
 
 export interface TypePrestation {
+  _id: string;
   id: string;
   nom: string;
   prix: number;

@@ -15,6 +15,7 @@ export interface SalonUser {
 }
 
 export interface SalonAccount {
+  logoUrl: string;
   id: string;
   nom: string;
   proprietaire: string;
@@ -69,6 +70,7 @@ export interface ClientVisit {
 }
 
 export interface ClientAccount {
+  createdAt: string;
   id: string;
   nom: string;
   email: string;

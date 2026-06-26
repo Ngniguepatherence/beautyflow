@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { BrandedShell } from '@/components/booking/BrandedShell';
 import { useClientAuth } from '@/contexts/ClientAuthContext';
 import { marketplaceApi } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
+import { GoogleLogin } from '@react-oauth/google';
 import {
   makeReference, buildTimeSlots, isSlotTaken,
 } from '@/lib/booking';
@@ -67,7 +69,7 @@ export default function PublicBookingFlow() {
   }, [slug, navigate, searchParams]);
 
   const settings = salon?.bookingSettings || { openingHour: 9, closingHour: 19, slotDurationMin: 30, autoConfirm: true, closedDays: [0] };
-  const staffList: SalonStaff[] = salon?.branding?.staff || [];
+  const staffList: SalonStaff[] = salon?.staff || salon?.branding?.staff || [];
   const slots = useMemo(
     () => buildTimeSlots(settings.openingHour, settings.closingHour, settings.slotDurationMin),
     [settings],
@@ -82,9 +84,27 @@ export default function PublicBookingFlow() {
   const [form, setForm] = useState({ fullName: '', phone: '', email: '', notes: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [busyAppointments, setBusyAppointments] = useState<any[]>([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
 
   // Prefill from logged-in client account
-  const { client, token, update } = useClientAuth();
+  const { client, token, update, googleLogin, googleLoginRedirect, loginWithToken } = useClientAuth();
+
+  const [params] = useSearchParams();
+  const tokenParam = params.get('token');
+
+  useEffect(() => {
+    if (tokenParam) {
+      loginWithToken(tokenParam).then((r) => {
+        if (r.ok) {
+          toast({ title: 'Connexion Google réussie ! 🚀', description: 'Vos informations ont été pré-remplies.' });
+          // Clean token from the URL path
+          navigate(`/booking/${slug}/book`, { replace: true });
+        }
+      });
+    }
+  }, [tokenParam, loginWithToken, navigate, slug]);
+
   useEffect(() => {
     if (client) {
       setForm(f => ({
@@ -97,7 +117,61 @@ export default function PublicBookingFlow() {
   }, [client]);
 
   const dateStr = date ? format(date, 'yyyy-MM-dd') : '';
-  const existing = [] as any[]; // TODO: Fetch existing rendez-vous to disable slots
+
+  useEffect(() => {
+    if (slug && dateStr) {
+      setLoadingAppointments(true);
+      marketplaceApi.getSalonAppointments(slug, dateStr)
+        .then((res) => {
+          if (res.success) {
+            setBusyAppointments(res.data || []);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch appointments:", err);
+        })
+        .finally(() => {
+          setLoadingAppointments(false);
+        });
+    }
+  }, [slug, dateStr]);
+
+  const timeToMinutes = (t: string) => {
+    if (!t) return 0;
+    const [h, mm] = t.split(':').map(Number);
+    return h * 60 + mm;
+  };
+
+  const isStaffAvailableAt = (member: any, slotTime: string) => {
+    // 1. Check working hours
+    const dayOfWeek = String(date ? date.getDay() : new Date().getDay());
+    const memberAvailability = member.availability || settings.availability || salon.availability || null;
+    
+    if (memberAvailability && memberAvailability[dayOfWeek]) {
+      const daySched = memberAvailability[dayOfWeek];
+      if (!daySched.open) return false;
+      const startMin = timeToMinutes(daySched.start || '08:00');
+      const endMin = timeToMinutes(daySched.end || '19:00');
+      const slotStart = timeToMinutes(slotTime);
+      const slotEnd = slotStart + settings.slotDurationMin;
+      if (slotStart < startMin || slotEnd > endMin) return false;
+    }
+
+    // 2. Check overlap with existing appointments
+    const slotStart = timeToMinutes(slotTime);
+    const slotEnd = slotStart + settings.slotDurationMin;
+    const hasOverlap = busyAppointments.some(appt => {
+      const apptMemberId = typeof appt.employe === 'object' ? appt.employe?._id : appt.employe;
+      const memberId = member._id || member.id;
+      if (!apptMemberId || !memberId || apptMemberId.toString() !== memberId.toString()) return false;
+      
+      const apptStart = timeToMinutes(appt.heure);
+      const apptEnd = apptStart + (appt.duree || 30);
+      return slotStart < apptEnd && slotEnd > apptStart;
+    });
+
+    return !hasOverlap;
+  };
 
   const totalSteps = 5;
   const next = () => setStep(s => Math.min(totalSteps, (s + 1)) as Step);
@@ -127,7 +201,8 @@ export default function PublicBookingFlow() {
         heure: time,
         telephoneClient: parsed.data.phone,
         nomClient: parsed.data.fullName,
-        notes: parsed.data.notes
+        notes: parsed.data.notes,
+        employe: staff?.id || (staff as any)?._id || null
       };
 
       const reference = makeReference();
@@ -404,7 +479,35 @@ export default function PublicBookingFlow() {
               <div className="space-y-4">
                 {slotGroups.map(g => {
                   const Icon = g.icon;
-                  const available = g.items.filter(t => !isSlotTaken(existing, dateStr, t));
+                  const available = g.items.filter(t => {
+                    const todayStr = format(new Date(), 'yyyy-MM-dd');
+                    if (dateStr === todayStr) {
+                      const now = new Date();
+                      const nowMin = now.getHours() * 60 + now.getMinutes();
+                      if (timeToMinutes(t) < nowMin + 30) return false;
+                    }
+
+                    if (staff) {
+                      return isStaffAvailableAt(staff, t);
+                    } else if (staffList.length > 0) {
+                      return staffList.some(member => isStaffAvailableAt(member, t));
+                    } else {
+                      const slotStart = timeToMinutes(t);
+                      const dayOfWeek = String(date ? date.getDay() : new Date().getDay());
+                      const salonSched = salon.availability?.[dayOfWeek] || { open: true, start: '08:00', end: '19:00' };
+                      if (!salonSched.open) return false;
+                      const startMin = timeToMinutes(salonSched.start || '08:00');
+                      const endMin = timeToMinutes(salonSched.end || '19:00');
+                      if (slotStart < startMin || slotStart + settings.slotDurationMin > endMin) return false;
+
+                      const hasOverlap = busyAppointments.some(appt => {
+                        const apptStart = timeToMinutes(appt.heure);
+                        const apptEnd = apptStart + (appt.duree || 30);
+                        return slotStart < apptEnd && (slotStart + settings.slotDurationMin) > apptStart;
+                      });
+                      return !hasOverlap;
+                    }
+                  });
                   return (
                     <div key={g.label}>
                       <div className="flex items-center gap-2 mb-2 px-1">
@@ -418,7 +521,7 @@ export default function PublicBookingFlow() {
                       </div>
                       <div className="grid grid-cols-4 gap-2">
                         {g.items.map(t => {
-                          const taken = isSlotTaken(existing, dateStr, t);
+                          const taken = !available.includes(t);
                           return (
                             <button
                               key={t}
@@ -446,7 +549,31 @@ export default function PublicBookingFlow() {
 
         {/* Step 4: Customer info */}
         {step === 4 && (
-          <div className="space-y-5">
+          <div className="space-y-5 animate-fade-in">
+            {!client && (
+              <Card className="p-5 border border-primary/20 bg-primary/5 rounded-2xl flex flex-col items-center gap-3 text-center mb-6">
+                <div className="font-bold text-sm text-foreground">Réservez plus rapidement</div>
+                <p className="text-xs text-muted-foreground">Connectez-vous en un clic avec Google pour pré-remplir vos coordonnées.</p>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full h-11 relative overflow-hidden group hover:border-primary/50 transition-colors"
+                  onClick={() => googleLoginRedirect(`/booking/${slug}/book`)}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <svg className="w-4.5 h-4.5 mr-2" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  <span className="font-semibold text-xs text-foreground/80 group-hover:text-foreground transition-colors">
+                    Continuer avec Google
+                  </span>
+                </Button>
+              </Card>
+            )}
+
             {client && (
               <Card className="p-3 bg-primary/5 border-primary/20 flex items-center gap-3 animate-fade-in">
                 <div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold">

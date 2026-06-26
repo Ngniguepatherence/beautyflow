@@ -40,6 +40,19 @@ function isSalonOpenNow(s: ReturnType<typeof getSalonAccounts>[number]): boolean
   return h >= (bs.openingHour ?? 9) && h < (bs.closingHour ?? 19);
 }
 
+// Haversine formula to calculate distance between two coordinates in km
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+}
+
 export default function PublicExplorer() {
   const navigate = useNavigate();
   const { client, isFavorite, toggleFavorite } = useClientAuth();
@@ -50,6 +63,7 @@ export default function PublicExplorer() {
   const [openNow, setOpenNow] = useState(false);
   const [instantOnly, setInstantOnly] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
 
   const CATEGORIES = [
   { id: 'all', label: t('explorer.categories.all'), icon: Sparkles },
@@ -112,6 +126,18 @@ useEffect(() => {
       (s.branding?.description || s.description || '').toLowerCase().includes(q) ||
       (s.branding?.category || s.typeEtablissement || '').toLowerCase().includes(q)
     );
+  }).map(s => {
+    // Inject distance into salon object if location is available
+    if (userLocation && s.location?.lat && s.location?.lng) {
+      const distance = calculateDistance(userLocation.lat, userLocation.lng, s.location.lat, s.location.lng);
+      return { ...s, calculatedDistance: distance };
+    }
+    return s;
+  }).sort((a, b) => {
+    if (userLocation && a.calculatedDistance !== undefined && b.calculatedDistance !== undefined) {
+      return a.calculatedDistance - b.calculatedDistance;
+    }
+    return 0;
   });
 
   const activeFiltersCount =
@@ -138,6 +164,7 @@ useEffect(() => {
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
           const res = await fetch(
             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`
           );
@@ -167,7 +194,7 @@ useEffect(() => {
         setLocating(false);
         toast({ title: 'Accès refusé', description: 'Autorisez la localisation pour utiliser cette option.', variant: 'destructive' });
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60_000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60_000 }
     );
   };
 
@@ -592,6 +619,14 @@ function SalonCard({ s, i, navigate, isFavorite, toggleFavorite, client }: { s: 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/20 via-transparent to-accent/20" />
+
+        {/* Distance badge if available */}
+        {s.calculatedDistance !== undefined && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm flex items-center gap-1 z-10">
+            <Navigation className="h-3 w-3 text-primary" />
+            {s.calculatedDistance < 1 ? '< 1 km' : `à ${s.calculatedDistance.toFixed(1)} km`}
+          </div>
+        )}
 
         {/* Top badges */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
