@@ -194,7 +194,7 @@ useEffect(() => {
         setLocating(false);
         toast({ title: 'Accès refusé', description: 'Autorisez la localisation pour utiliser cette option.', variant: 'destructive' });
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60_000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60_000 }
     );
   };
 

@@ -36,25 +36,6 @@ const TESTIMONIALS = [
 
 export default function BusinessSignup() {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('pro');
-  const [form, setForm] = useState({ name: '', salon: '', city: '', phone: '', notes: '' });
-
-  const buildWhatsappUrl = () => {
-    const plan = PLANS[selectedPlan];
-    const text =
-      `Bonjour BeautyFlow ✨%0A%0A` +
-      `Je souhaite référencer mon salon et m'abonner à la formule *${plan.label}* (${formatPlanPrice(plan.price)}).%0A%0A` +
-      `👤 Nom: ${form.name || '—'}%0A` +
-      `💇 Salon: ${form.salon || '—'}%0A` +
-      `📍 Ville: ${form.city || '—'}%0A` +
-      `📞 WhatsApp: ${form.phone || '—'}%0A` +
-      `📝 Notes: ${form.notes || '—'}`;
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
-  };
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    window.open(buildWhatsappUrl(), '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -100,11 +81,11 @@ export default function BusinessSignup() {
                   Voir les formules <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </a>
-              <a href="#signup">
+              <Link to="/pro/onboarding">
                 <Button size="lg" variant="outline" className="h-12 px-7 rounded-full text-sm font-semibold border-2">
                   Référencer mon salon
                 </Button>
-              </a>
+              </Link>
             </div>
             <div className="mt-8 flex items-center justify-center gap-6 text-xs text-muted-foreground flex-wrap">
               <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5 text-success" /> Sans engagement</span>
@@ -187,12 +168,11 @@ export default function BusinessSignup() {
             const isPro = key === 'pro';
             const isSelected = selectedPlan === key;
             return (
-              <button
+              <Link
                 key={key}
-                onClick={() => { setSelectedPlan(key); document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' }); }}
-                className={`text-left relative p-6 rounded-3xl border-2 transition-all duration-300 ${
-                  isPro ? 'border-primary shadow-xl scale-[1.02]' : 'border-border/60 hover:border-primary/50'
-                } ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} bg-card hover:-translate-y-1`}
+                to="/pro/onboarding"
+                className={`block text-left relative p-6 rounded-3xl border-2 transition-all duration-300 ${isPro ? 'border-primary shadow-xl scale-[1.02]' : 'border-border/60 hover:border-primary/50'
+                  } ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} bg-card hover:-translate-y-1`}
               >
                 {isPro && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 h-6 inline-flex items-center rounded-full gradient-primary text-primary-foreground text-[11px] font-bold shadow-md">
@@ -218,12 +198,11 @@ export default function BusinessSignup() {
                   <Feat ok={plan.prioritySupport}>Support prioritaire</Feat>
                 </ul>
 
-                <div className={`mt-6 h-11 rounded-full inline-flex items-center justify-center w-full text-sm font-semibold transition-all ${
-                  isPro ? 'gradient-primary text-primary-foreground shadow-md' : 'border-2 border-foreground/15 hover:border-primary hover:text-primary'
-                }`}>
+                <div className={`mt-6 h-11 rounded-full inline-flex items-center justify-center w-full text-sm font-semibold transition-all ${isPro ? 'gradient-primary text-primary-foreground shadow-md' : 'border-2 border-foreground/15 hover:border-primary hover:text-primary'
+                  }`}>
                   Choisir {plan.label} <ChevronRight className="h-4 w-4 ml-1" />
                 </div>
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -252,65 +231,30 @@ export default function BusinessSignup() {
         </div>
       </section>
 
-      {/* SIGNUP FORM */}
+      {/* CTA SECTION */}
       <section id="signup" className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 gradient-primary opacity-95" />
-        <div className="max-w-3xl mx-auto px-4 py-16 sm:py-20 text-primary-foreground">
-          <div className="text-center mb-8">
-            <Store className="h-10 w-10 mx-auto mb-3" />
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Référencez votre salon</h2>
-            <p className="mt-2 text-primary-foreground/85">Formule sélectionnée : <strong>{PLANS[selectedPlan].label}</strong> — {formatPlanPrice(PLANS[selectedPlan].price)}</p>
+        <div className="max-w-3xl mx-auto px-4 py-16 sm:py-20 text-primary-foreground text-center">
+          <Store className="h-10 w-10 mx-auto mb-3" />
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Prêt à transformer votre salon ?</h2>
+          <p className="mt-4 text-primary-foreground/85 max-w-xl mx-auto">
+            Créez votre compte professionnel gratuitement, configurez votre vitrine, et laissez nos outils booster vos revenus.
+          </p>
+          <div className="mt-8">
+            <Link to="/pro/onboarding">
+              <Button size="lg" className="h-14 px-10 rounded-full bg-white text-primary hover:bg-white/90 font-bold text-base shadow-xl">
+                Créer mon compte pro gratuitement
+              </Button>
+            </Link>
           </div>
+          <p className="mt-6 text-[11px] text-primary-foreground/60 flex items-center justify-center gap-1.5">
+            <Shield className="h-3 w-3" /> Vos données restent privées. Activation immédiate.
+          </p>
 
-          <form onSubmit={submit} className="bg-card text-card-foreground rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4 border border-white/20">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground">Votre nom</label>
-                <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Marie Ngono" className="mt-1.5 h-11" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground">Nom du salon</label>
-                <Input required value={form.salon} onChange={(e) => setForm({ ...form, salon: e.target.value })} placeholder="Glow Beauty Studio" className="mt-1.5 h-11" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground">Ville</label>
-                <Input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Douala" className="mt-1.5 h-11" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground">WhatsApp</label>
-                <Input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+237 6 XX XX XX XX" className="mt-1.5 h-11" />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground">Message (optionnel)</label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Parlez-nous brièvement de votre salon..." className="mt-1.5 min-h-[88px]" />
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {(Object.keys(PLANS) as PlanType[]).map((k) => (
-                <button
-                  type="button"
-                  key={k}
-                  onClick={() => setSelectedPlan(k)}
-                  className={`h-10 rounded-full text-xs font-semibold border-2 transition-all ${
-                    selectedPlan === k ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  {PLANS[k].label}
-                </button>
-              ))}
-            </div>
-            <Button type="submit" size="lg" className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold text-sm shadow-lg hover:shadow-xl">
-              <MessageCircle className="h-4 w-4" /> Envoyer via WhatsApp
-            </Button>
-            <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1.5">
-              <Shield className="h-3 w-3" /> Vos données restent privées. Aucun paiement en ligne — activation manuelle.
-            </p>
-          </form>
-
-          <div className="mt-8 text-center text-sm text-primary-foreground/85">
-            Une question ? Écrivez-nous directement sur{' '}
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="underline font-semibold">
-              WhatsApp
+          <div className="mt-12 pt-8 border-t border-white/20 text-sm text-primary-foreground/85">
+            Une question ou besoin d'aide ?{' '}
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="underline font-semibold text-white">
+              Contactez-nous sur WhatsApp
             </a>
           </div>
         </div>

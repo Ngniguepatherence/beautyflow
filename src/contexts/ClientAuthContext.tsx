@@ -18,6 +18,8 @@ interface Ctx {
   signup: (i: { nom: string; email: string; password: string; telephone?: string }) => Promise<{ ok: true } | { ok: false; reason: string }>;
   signin: (email: string, password: string) => Promise<{ ok: true } | { ok: false; reason: string }>;
   googleLogin: (token: string) => Promise<{ ok: true } | { ok: false; reason: string }>;
+  googleLoginRedirect: (redirectPath?: string) => void;
+  loginWithToken: (token: string) => Promise<{ ok: true } | { ok: false; reason: string }>;
   signout: () => void;
   toggleFavorite: (salonId: string) => Promise<void>;
   isFavorite: (salonId: string) => boolean;
@@ -59,7 +61,7 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
   const googleLogin: Ctx['googleLogin'] = useCallback(async (gToken: string) => {
     try {
       // Create googleLogin method in API file if it doesn't exist, or just use fetch
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/marketplace/auth/google`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/marketplace/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: gToken })
@@ -79,33 +81,61 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const toggleFavorite = useCallback(async (salonId: string) => {
-    // Ideally this hits the backend, but for now we update local state
-    if (!client || !salonId) return;
-    const favs = client.favoris || [];
-    const isFav = favs.some((f: any) => f._id === salonId || f === salonId);
-    let newFavs = isFav ? favs.filter((f: any) => f._id !== salonId && f !== salonId) : [...favs, salonId];
-    const newClient = { ...client, favoris: newFavs };
-    setClient(newClient); setStoredClient(newClient);
-  }, [client]);
+    if (!client || !salonId || !token) return;
+    try {
+      const res = await marketplaceApi.toggleFavorite(token, salonId);
+      if (res.success && res.user) {
+        setClient(res.user);
+        setStoredClient(res.user);
+      }
+    } catch (e) {
+      console.error("Error toggling favorite:", e);
+    }
+  }, [client, token]);
 
   const isFavorite = useCallback((salonId: string) => {
     if (!client || !client.favoris || !salonId) return false;
-    return client.favoris.some((f: any) => f._id === salonId || f === salonId);
+    return client.favoris.some((f: any) => (f._id || f) === salonId);
   }, [client]);
 
   const logVisit = useCallback((v: Omit<ClientVisit, 'visitedAt'>) => {
     // not used strictly anymore
   }, [client]);
 
-  const update = useCallback((patch: Partial<ClientAccount>) => {
-    if (!client) return;
-    const u = { ...client, ...patch };
-    setClient(u); setStoredClient(u);
-  }, [client]);
+  const update = useCallback(async (patch: Partial<ClientAccount>) => {
+    if (!client || !token) return;
+    try {
+      const res = await marketplaceApi.updateProfile(token, patch);
+      if (res.success && res.user) {
+        setClient(res.user);
+        setStoredClient(res.user);
+      }
+    } catch (e) {
+      console.error("Error updating profile:", e);
+    }
+  }, [client, token]);
+
+  const googleLoginRedirect = useCallback((redirectPath?: string) => {
+    marketplaceApi.googleLogin(redirectPath);
+  }, []);
+
+  const loginWithToken: Ctx['loginWithToken'] = useCallback(async (jwtToken: string) => {
+    try {
+      setToken(jwtToken); setStoredToken(jwtToken);
+      const r = await marketplaceApi.getMe(jwtToken);
+      if (r.success) {
+        setClient(r.user); setStoredClient(r.user);
+        return { ok: true };
+      }
+      return { ok: false, reason: r.message || 'Session invalide' };
+    } catch (e: any) {
+      return { ok: false, reason: e.message };
+    }
+  }, []);
 
   return (
     <ClientAuthContext.Provider value={{
-      client, isAuthenticated: !!client, signup, signin, googleLogin, signout,
+      client, isAuthenticated: !!client, signup, signin, googleLogin, googleLoginRedirect, loginWithToken, signout,
       toggleFavorite, isFavorite, logVisit, update, token
     }}>
       {children}

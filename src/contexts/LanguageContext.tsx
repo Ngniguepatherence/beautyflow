@@ -13,9 +13,17 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 const LANG_KEY = 'beautyflow_language';
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLangState] = useState<Language>(
-    () => getStorageItem<Language>(LANG_KEY, 'fr')
-  );
+  const [language, setLangState] = useState<Language>(() => {
+    const stored = getStorageItem<Language>(LANG_KEY, null as any);
+    if (stored) return stored;
+
+    const browserLang = navigator.language.toLowerCase();
+    const detectedLang: Language = browserLang.startsWith('en') ? 'en' : 'fr';
+    
+    // Persist the detected language right away
+    setStorageItem(LANG_KEY, detectedLang);
+    return detectedLang;
+  });
 
   const setLanguage = useCallback((lang: Language) => {
     setLangState(lang);

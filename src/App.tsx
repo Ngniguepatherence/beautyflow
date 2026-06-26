@@ -14,6 +14,10 @@ import BusinessSignup from "@/pages/BusinessSignup";
 import ClientLogin from "@/pages/ClientLogin";
 import ClientAccount from "@/pages/ClientAccount";
 import { ClientAuthProvider } from "@/contexts/ClientAuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import ProOnboarding from "@/pages/ProOnboarding";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +28,7 @@ function AppRoutes() {
       <Route path="/" element={<PublicExplorer />} />
       <Route path="/explorer" element={<Navigate to="/" replace />} />
       <Route path="/pro" element={<BusinessSignup />} />
+      <Route path="/pro/onboarding" element={<ProOnboarding />} />
       <Route path="/business" element={<Navigate to="/pro" replace />} />
       <Route path="/explorer/login" element={<ClientLogin />} />
       <Route path="/explorer/account" element={<ClientAccount />} />
@@ -38,20 +43,24 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <PWAInstallPrompt />
-      <BrowserRouter>
-        <LanguageProvider>
-          <ClientAuthProvider>
-            <AppRoutes />
-          </ClientAuthProvider>
-        </LanguageProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy_client_id_for_dev'}>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <PWAInstallPrompt />
+        <BrowserRouter>
+          <LanguageProvider>
+            <AuthProvider>
+              <ClientAuthProvider>
+                <AppRoutes />
+              </ClientAuthProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </GoogleOAuthProvider>
 );
 
 export default App;

@@ -19,7 +19,7 @@ function formatCurrency(amount: number): string {
 }
 
 export default function AdminDashboard() {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [salons, setSalons] = useState<SalonAccount[]>(getSalonAccounts);
@@ -41,9 +41,9 @@ export default function AdminDashboard() {
     try {
       setIsProcessing(true);
       // In a real app we'd get the token from auth context, here we mock it or pass user token if available
-      const token = 'mock-token-from-auth-context'; 
+      const token = 'mock-token-from-auth-context';
       const response = await paymentsApi.subscribe(id, 'pro', token);
-      
+
       if (response.success && response.data.paymentLink) {
         window.location.href = response.data.paymentLink;
       } else {
